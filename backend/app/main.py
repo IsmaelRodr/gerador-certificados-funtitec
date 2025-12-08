@@ -4,30 +4,73 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.background import BackgroundTask
 from uuid import uuid4
 from pathlib import Path
+from datetime import datetime
 from .utils import fill_template, convert_docx_to_pdf
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
-    allow_methods=['*'],
-    allow_headers=['*']
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
 BASE_DIR = Path(__file__).parent
 TEMPLATE_PATH = BASE_DIR / "template.docx"
 
+# ----------------------------------------------------
+# BANCO DE DADOS NA MEMÓRIA (reinicia ao desligar)
+# ----------------------------------------------------
+eventos_db = []
+
+# ----------------------------------------------------
+# CADASTRAR EVENTO
+# ----------------------------------------------------
+@app.post("/eventos")
+async def criar_evento(
+    evento: str = Form(...),
+    periodo: str = Form(...),
+    horas: str = Form(...)
+):
+    novo = {
+        "evento": evento,
+        "periodo": periodo,
+        "horas": horas
+    }
+    eventos_db.append(novo)
+    return {"message": "Evento criado", "data": novo}
+
+# ----------------------------------------------------
+# LISTAR EVENTOS
+# ----------------------------------------------------
+@app.get("/eventos")
+async def listar_eventos():
+    return eventos_db
+
+# ----------------------------------------------------
+# GERAR CERTIFICADO
+# ----------------------------------------------------
 @app.post("/generate")
 async def generate(
     nome: str = Form(...),
-    evento: str = Form(...),
-    periodo: str = Form(...),
-    horas: str = Form(...),
-    dia: str = Form(...),
-    mes: str = Form(...),
-    ano: str = Form(...),
+    evento: str = Form(...)
 ):
+    # Verifica se evento existe
+    dados_evento = next((e for e in eventos_db if e["evento"] == evento), None)
+
+    if not dados_evento:
+        raise HTTPException(status_code=400, detail="Evento não encontrado")
+
+    periodo = dados_evento["periodo"]
+    horas = dados_evento["horas"]
+
+    # Data automática
+    hoje = datetime.now()
+    dia = f"{hoje.day:02d}"
+    mes = f"{hoje.month:02d}"
+    ano = hoje.year
+
     context = {
         "nome": nome,
         "evento": evento,
