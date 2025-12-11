@@ -48,6 +48,17 @@ async def criar_evento(
 async def listar_eventos():
     return eventos_db
 
+
+# ----------------------------------------------------
+# DELETAR EVENTOS
+# ----------------------------------------------------
+@app.delete("/eventos/{nome_evento}")
+async def deletar_evento(nome_evento: str):
+    global eventos_db
+
+    eventos_db = [ev for ev in eventos_db if ev["evento"] != nome_evento]
+    return {"status": "ok"}
+
 # ----------------------------------------------------
 # GERAR CERTIFICADO
 # ----------------------------------------------------
@@ -65,10 +76,16 @@ async def generate(
     periodo = dados_evento["periodo"]
     horas = dados_evento["horas"]
 
+    # Meses por extenso (pt-BR)
+    meses_ptbr = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+    ]
+    
     # Data automática
     hoje = datetime.now()
     dia = f"{hoje.day:02d}"
-    mes = f"{hoje.month:02d}"
+    mes = meses_ptbr[hoje.month - 1]
     ano = hoje.year
 
     context = {

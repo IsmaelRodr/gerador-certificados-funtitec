@@ -159,20 +159,65 @@ export default function App() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center px-4">
-          <div className="bg-white w-full max-w-md p-6 rounded-xl shadow-xl">
+        <div
+          className="fixed inset-0 flex items-center justify-center
+               bg-black/40 backdrop-blur-sm 
+               animate-fadeIn px-4 z-50"
+        >
+          {/* CONTAINER DO MODAL */}
+          <div
+            className="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl
+                 max-h-[90vh] overflow-y-auto
+                 animate-scaleIn"
+          >
+            <h2 className="text-xl font-bold mb-4 text-center">Gerenciar Eventos</h2>
 
-            <h2 className="text-xl font-bold mb-4 text-center">
-              Cadastrar Evento
-            </h2>
+            {/* LISTA DE EVENTOS */}
+            <div className="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2">
+              {eventos.length === 0 && (
+                <p className="text-gray-500 text-center">Nenhum evento cadastrado</p>
+              )}
+
+              {eventos.map((ev, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg"
+                >
+                  <div>
+                    <p className="font-semibold">{ev.evento}</p>
+                    <p className="text-sm text-gray-600">
+                      {ev.periodo} — {ev.horas}h
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      await fetch(`http://localhost:8000/eventos/${ev.evento}`, {
+                        method: "DELETE"
+                      });
+
+                      const lista = await fetch("http://localhost:8000/eventos").then(r => r.json());
+                      setEventos(lista);
+
+                      if (eventoSelecionado === ev.evento) {
+                        setEventoSelecionado(lista.length ? lista[0].evento : "");
+                      }
+                    }}
+                    className="text-red-600 font-bold hover:text-red-800 transition"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* FORM CADASTRAR NOVO EVENTO */}
+            <h3 className="font-bold text-lg mb-2">Cadastrar novo evento</h3>
 
             <form onSubmit={salvarEvento} className="space-y-4">
-
-              {/* Inputs do Modal */}
               {["evento", "periodo", "horas"].map((campo) => (
                 <div key={campo} className="flex flex-col">
                   <label className="font-semibold capitalize">{campo}</label>
-
                   <input
                     name={campo}
                     value={eventoForm[campo]}
@@ -183,21 +228,21 @@ export default function App() {
                 </div>
               ))}
 
-              {/* Salvar */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg mt-2"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg mt-2
+                     hover:bg-blue-700 active:bg-blue-800 transition"
               >
                 Salvar Evento
               </button>
 
-              {/* Cancelar */}
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg mt-2"
+                className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg mt-2
+                     hover:bg-gray-400 transition"
               >
-                Cancelar
+                Fechar
               </button>
             </form>
           </div>
