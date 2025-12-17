@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL;
 import { useEffect, useState } from "react";
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
 
   // Buscar eventos cadastrados ao carregar a página
   useEffect(() => {
-    fetch("http://localhost:8000/eventos")
+    fetch(`${API_URL}/eventos`)
       .then(res => res.json())
       .then(data => {
         setEventos(data);
@@ -39,13 +40,13 @@ export default function App() {
     const fd = new FormData();
     Object.keys(eventoForm).forEach(k => fd.append(k, eventoForm[k]));
 
-    await fetch("http://localhost:8000/eventos", {
+    await fetch(`${API_URL}/eventos`, {
       method: "POST",
       body: fd,
     });
 
     // Recarregar lista de eventos
-    const lista = await fetch("http://localhost:8000/eventos").then(r => r.json());
+    const lista = await fetch(`${API_URL}/eventos`).then(r => r.json());
     setEventos(lista);
 
     // Selecionar automaticamente o evento criado
@@ -64,7 +65,7 @@ export default function App() {
     fd.append("nome", nome);
     fd.append("evento", eventoSelecionado);
 
-    const res = await fetch("http://localhost:8000/generate", {
+    const res = await fetch(`${API_URL}/generate`, {
       method: "POST",
       body: fd,
     });
@@ -192,11 +193,11 @@ export default function App() {
 
                   <button
                     onClick={async () => {
-                      await fetch(`http://localhost:8000/eventos/${ev.evento}`, {
+                      await fetch(`${API_URL}/eventos/${ev.evento}`, {
                         method: "DELETE"
                       });
 
-                      const lista = await fetch("http://localhost:8000/eventos").then(r => r.json());
+                      const lista = await fetch(`${API_URL}/eventos`).then(r => r.json());
                       setEventos(lista);
 
                       if (eventoSelecionado === ev.evento) {
