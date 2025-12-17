@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: gerador-certificados-backend
+    env: docker
+    plan: free
+    branch: main
+    rootDir: .
+    dockerfilePath: Dockerfile
+    autoDeploy: true
